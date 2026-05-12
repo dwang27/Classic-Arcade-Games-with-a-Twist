@@ -36,7 +36,7 @@ RARITY_COLORS = {
     "Legendary": (255, 160,  30),   # yellowish orange
 }
 BASE_RATES = {"Common":0.50,"Uncommon":0.25,"Rare":0.15,"Epic":0.07,"Legendary":0.03}
-ROLL_COST  = 80
+ROLL_COST  = 1
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  PATH
@@ -60,20 +60,69 @@ PATH_CELLS = _path_cells()
 # ─────────────────────────────────────────────────────────────────────────────
 TOWER_T = {
     # Common — dirt & wood
-    "Dirt Tower":       ("Common",     7, 105, 58, (139,  90,  43),  80),
-    "Wood Tower":       ("Common",    10, 110, 55, (170, 130,  70),  80),
+    "Dirt Tower": (
+        "Common", 7, 105, 58,
+        (139, 90, 43), 80,
+        "dirt.png"
+    ),
+
+    "Wood Tower": (
+        "Common", 10, 110, 55,
+        (170, 130, 70), 80,
+        "wood.png"
+    ),
+
     # Uncommon — stone & copper
-    "Stone Tower":      ("Uncommon",  20, 135, 48, (130, 130, 130), 160),
-    "Copper Tower":     ("Uncommon",  24, 130, 50, (196, 127,  75), 160),
+    "Stone Tower": (
+        "Uncommon", 20, 135, 48,
+        (130, 130, 130), 160,
+        "stone.png"
+    ),
+
+    "Copper Tower": (
+        "Uncommon", 24, 130, 50,
+        (196, 127, 75), 160,
+        "copper.png"
+    ),
+
     # Rare — iron & gold
-    "Iron Tower":       ("Rare",      34, 150, 42, (210, 210, 210), 240),
-    "Gold Tower":       ("Rare",      38, 145, 38, (255, 215,   0), 240),
+    "Iron Tower": (
+        "Rare", 34, 150, 42,
+        (210, 210, 210), 240,
+        "iron.png"
+    ),
+
+    "Gold Tower": (
+        "Rare", 38, 145, 38,
+        (255, 215, 0), 240,
+        "gold.png"
+    ),
+
     # Epic — emerald & lapis
-    "Emerald Tower":    ("Epic",      55, 168, 30, ( 20, 200,  80), 320),
-    "Lapis Tower":      ("Epic",      58, 155, 32, ( 30,  80, 200), 320),
+    "Emerald Tower": (
+        "Epic", 55, 168, 30,
+        (20, 200, 80), 320,
+        "emerald.png"
+    ),
+
+    "Lapis Tower": (
+        "Epic", 58, 155, 32,
+        (30, 80, 200), 320,
+        "lapis.png"
+    ),
+
     # Legendary — diamond & netherite
-    "Diamond Tower":    ("Legendary", 88, 198, 25, ( 90, 215, 255), 400),
-    "Netherite Tower":  ("Legendary",115, 182, 20, ( 70,  60,  70), 400),
+    "Diamond Tower": (
+        "Legendary", 88, 198, 25,
+        (90, 215, 255), 400,
+        "diamond.png"
+    ),
+
+    "Netherite Tower": (
+        "Legendary", 115, 182, 20,
+        (70, 60, 70), 400,
+        "netherite.png"
+    ),
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -115,49 +164,115 @@ def gacha_roll(luck=0):
 class Tower:
     def __init__(self,name,gx,gy):
         t=TOWER_T[name]
-        self.name=name; self.rarity=t[0]; self.dmg=t[1]; self.rng=t[2]
-        self.rate=t[3]; self.col=t[4]; self.base_cost=t[5]
-        self.gx=gx; self.gy=gy
-        self.px=gx*GRID+GRID//2; self.py=gy*GRID+GRID//2
-        self.cd=0; self.level=1; self.spent=t[5]; self.flash=0; self.target=None
 
-    def upgrade_cost(self): return 60*self.level
-    def sell_val(self): return int(self.spent*SELL_REF)
+        self.name=name
+        self.rarity=t[0]
+        self.dmg=t[1]
+        self.rng=t[2]
+        self.rate=t[3]
+        self.col=t[4]
+        self.base_cost=t[5]
+
+        self.img = pygame.image.load(f"textures/{t[6]}").convert_alpha()
+        self.img = pygame.transform.scale(self.img, (32, 32))
+
+        self.gx=gx
+        self.gy=gy
+        self.px=gx*GRID+GRID//2
+        self.py=gy*GRID+GRID//2
+
+        self.cd=0
+        self.level=1
+        self.spent=t[5]
+        self.flash=0
+        self.target=None
+
+    def upgrade_cost(self):
+        return 60*self.level
+
+    def sell_val(self):
+        return int(self.spent*SELL_REF)
 
     def upgrade(self):
-        self.spent+=self.upgrade_cost(); self.level+=1
-        self.dmg=int(self.dmg*1.4); self.rng=int(self.rng*1.1)
+        self.spent+=self.upgrade_cost()
+        self.level+=1
+        self.dmg=int(self.dmg*1.4)
+        self.rng=int(self.rng*1.1)
         self.rate=max(8,int(self.rate*0.85))
 
     def update(self,enemies,projectiles):
-        if self.cd>0: self.cd-=1
-        if self.flash>0: self.flash-=1
-        best=None; bp=-1
+        if self.cd>0:
+            self.cd-=1
+
+        if self.flash>0:
+            self.flash-=1
+
+        best=None
+        bp=-1
+
         for e in enemies:
             d=math.hypot(e.px-self.px,e.py-self.py)
-            if d<=self.rng and e.prog>bp: best=e; bp=e.prog
-        self.target=best
-        if best and self.cd==0:
-            projectiles.append(Projectile(self.px,self.py,best,self.dmg,self.col))
-            self.cd=self.rate; self.flash=6
 
+            if d<=self.rng and e.prog>bp:
+                best=e
+                bp=e.prog
+
+        self.target=best
+
+        if best and self.cd==0:
+            projectiles.append(
+                Projectile(self.px,self.py,best,self.dmg,self.col)
+            )
+
+            self.cd=self.rate
+            self.flash=6
     def draw(self,surf,sel=False):
         sz=GRID//2-4
+
         if sel:
             r=self.rng
+
             rs=pygame.Surface((r*2,r*2),pygame.SRCALPHA)
             rs.fill((255,255,255,22))
-            pygame.draw.rect(rs,(255,255,255,80),(0,0,r*2,r*2),1)
+
+            pygame.draw.rect(
+                rs,
+                (255,255,255,80),
+                (0,0,r*2,r*2),
+                1
+            )
+
             surf.blit(rs,(self.px-r,self.py-r))
-            pygame.draw.rect(surf,(255,255,100),(self.px-sz-6,self.py-sz-6,(sz+6)*2,(sz+6)*2),2)
-        fc=lerp_col(self.col,WHITE,self.flash/10) if self.flash else self.col
-        pygame.draw.rect(surf,fc,(self.px-sz,self.py-sz,sz*2,sz*2))
+
+            pygame.draw.rect(
+                surf,
+                (255,255,100),
+                (self.px-sz-6,self.py-sz-6,(sz+6)*2,(sz+6)*2),
+                2
+            )
+
+        surf.blit(self.img, (self.px-sz, self.py-sz))
+
         rc=RARITY_COLORS[self.rarity]
-        pygame.draw.rect(surf,rc,(self.px-sz-3,self.py-sz-3,(sz+3)*2,(sz+3)*2),2)
+
+        pygame.draw.rect(
+            surf,
+            rc,
+            (self.px-sz-3,self.py-sz-3,(sz+3)*2,(sz+3)*2),
+            2
+        )
+
         if self.level>1:
             f=pygame.font.SysFont("consolas",11,bold=True)
+
             lb=f.render(f"L{self.level}",True,WHITE)
-            surf.blit(lb,(self.px-lb.get_width()//2,self.py-sz-14))
+
+            surf.blit(
+                lb,
+                (self.px-lb.get_width()//2,self.py-sz-14)
+            )
+
+
 
 
 class Enemy:
