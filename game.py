@@ -129,13 +129,51 @@ TOWER_T = {
 #  ENEMY TYPES  (name, base_hp, speed, reward, color, size, unlock_wave)
 # ─────────────────────────────────────────────────────────────────────────────
 ENEMY_T = [
-    {"name":"Normal",   "hp": 80, "spd":1.6,"rew":10,"col":(100,190, 70),"sz":12,"wave":1},
-    {"name":"Speedy",   "hp": 45, "spd":3.4,"rew":14,"col":(255,210, 50),"sz":10,"wave":2},
-    {"name":"Tank",     "hp":320, "spd":0.9,"rew":25,"col":(100,100,180),"sz":18,"wave":3},
-    {"name":"Mini Boss","hp":700, "spd":1.1,"rew":50,"col":(200, 60,200),"sz":22,"wave":6},
-    {"name":"Boss",     "hp":1800,"spd":0.7,"rew":120,"col":(220,40, 40),"sz":28,"wave":10},
-]
+    {
+        "name":"Normal",
+        "hp":80,
+        "spd":1.6,
+        "rew":10,
+        "col":(100,190,70),
+        "sz":12,
+        "wave":1,
+        "img":"zombie.png"
+    },
 
+    {
+        "name":"Speedy",
+        "hp":45,
+        "spd":3.4,
+        "rew":14,
+        "col":(255,210,50),
+        "sz":10,
+        "wave":2,
+        "img":"spider.png"
+    },
+
+    {
+        "name":"Tank",
+        "hp":320,
+        "spd":0.9,
+        "rew":25,
+        "col":(100,100,180),
+        "sz":18,
+        "wave":3,
+        "img":"warden.png"
+    },
+
+    {
+        "name":"Mini Boss",
+        "hp":700,
+        "spd":1.1,
+        "rew":50,
+        "col":(200,60,200),
+        "sz":22,
+        "wave":6,
+        "img":"wither.png"
+    },
+
+    {"name":"Boss","hp":1800,"spd":0.7,"rew":120,"col":(220,40,40),"sz":28,"wave":10,"img":"dragon.png"},]
 DIFF = {
     "easy":  {"hp":20,"hp_m":0.80,"rew_m":1.20,"lbl":"EASY",  "col":(60,200,80)},
     "normal":{"hp":20,"hp_m":1.00,"rew_m":1.00,"lbl":"NORMAL","col":(80,140,255)},
@@ -282,6 +320,11 @@ class Enemy:
         self.name=t["name"]; self.hp=int(t["hp"]*ws*hp_m); self.max_hp=self.hp
         self.spd=t["spd"]; self.rew=int(t["rew"]*rew_m)
         self.col=t["col"]; self.sz=t["sz"]
+        self.img = pygame.image.load(f"textures/{t['img']}").convert_alpha()
+
+        self.img = pygame.transform.scale(
+        self.img,
+        (self.sz * 2, self.sz * 2))
         self.wp=0; self.px,self.py=PIXEL_PATH[0]; self.prog=0.0
         self.alive=True; self.done=False
 
@@ -300,7 +343,10 @@ class Enemy:
 
     def draw(self,surf):
         s=self.sz
-        pygame.draw.rect(surf,self.col,(int(self.px)-s,int(self.py)-s,s*2,s*2))
+        surf.blit(
+        self.img,
+        (int(self.px)-s, int(self.py)-s)
+    )
         bw=s*2; rat=max(0,self.hp/self.max_hp)
         pygame.draw.rect(surf,(120,0,0),(int(self.px)-s,int(self.py)-s-8,bw,5))
         pygame.draw.rect(surf,(0,220,60),(int(self.px)-s,int(self.py)-s-8,int(bw*rat),5))
@@ -516,7 +562,9 @@ class Game:
             bg=(100,100,160) if sel else (52,58,78)
             pygame.draw.rect(self.screen,bg,(ix,y,48,48),border_radius=4)
             pygame.draw.rect(self.screen,rc,(ix,y,48,48),2,border_radius=4)
-            pygame.draw.rect(self.screen,col,(ix+12,y+12,24,24))
+            img = pygame.image.load(f"textures/{t[6]}").convert_alpha()
+            img = pygame.transform.scale(img, (24, 24))
+            self.screen.blit(img, (ix+12, y+12))
             self.inv_rects.append((ix,y,48,48))
             ix+=54
             if ix+48>SCREEN_W-4: ix=px; y+=54
