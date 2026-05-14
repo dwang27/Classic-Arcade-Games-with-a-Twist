@@ -134,9 +134,9 @@ ENEMY_T = [
         "hp":80,
         "spd":1.6,
         "rew":10,
-        "col":(100,190,70),
         "sz":12,
         "wave":1,
+        "dmg":1,
         "img":"zombie.png"
     },
 
@@ -145,9 +145,9 @@ ENEMY_T = [
         "hp":45,
         "spd":3.4,
         "rew":14,
-        "col":(255,210,50),
         "sz":10,
         "wave":2,
+        "dmg":1,
         "img":"spider.png"
     },
 
@@ -156,9 +156,9 @@ ENEMY_T = [
         "hp":320,
         "spd":0.9,
         "rew":25,
-        "col":(100,100,180),
         "sz":18,
         "wave":3,
+        "dmg":2,
         "img":"warden.png"
     },
 
@@ -167,13 +167,29 @@ ENEMY_T = [
         "hp":700,
         "spd":1.1,
         "rew":50,
-        "col":(200,60,200),
         "sz":22,
         "wave":6,
+        "dmg":3,
         "img":"wither.png"
     },
 
-    {"name":"Boss","hp":1800,"spd":0.7,"rew":120,"col":(220,40,40),"sz":28,"wave":10,"img":"dragon.png"},]
+    {
+        "name":"Boss",
+        "hp":1800,
+        "spd":0.7,
+        "rew":120,
+        "sz":28,
+        "wave":10,
+        "dmg":5,
+        "img":"dragon.png"},
+    {
+        "name":"Final",
+        "hp":50000,
+        "spd":0.2,
+        "rew":50000000,
+        "sz":50,
+        "wave":20,
+        "img":"storm.png"}]
 DIFF = {
     "easy":  {"hp":20,"hp_m":0.80,"rew_m":1.20,"lbl":"EASY",  "col":(60,200,80)},
     "normal":{"hp":20,"hp_m":1.00,"rew_m":1.00,"lbl":"NORMAL","col":(80,140,255)},
@@ -318,13 +334,21 @@ class Enemy:
         t=ENEMY_T[tidx]
         ws=1.0+0.05*(wave-1)
         self.name=t["name"]; self.hp=int(t["hp"]*ws*hp_m); self.max_hp=self.hp
-        self.spd=t["spd"]; self.rew=int(t["rew"]*rew_m)
-        self.col=t["col"]; self.sz=t["sz"]
+        self.spd=t["spd"]; self.rew=int(t["rew"]*rew_m); self.sz=t["sz"]; self.dmg=t["dmg"]
         self.img = pygame.image.load(f"textures/{t['img']}").convert_alpha()
 
+        w = self.img.get_width()
+        h = self.img.get_height()
+
+        scale = (self.sz * 2) / h
+
+        new_w = int(w * scale)
+        new_h = int(h * scale)
+
         self.img = pygame.transform.scale(
-        self.img,
-        (self.sz * 2, self.sz * 2))
+            self.img,
+            (new_w, new_h)
+            )
         self.wp=0; self.px,self.py=PIXEL_PATH[0]; self.prog=0.0
         self.alive=True; self.done=False
 
@@ -345,8 +369,8 @@ class Enemy:
         s=self.sz
         surf.blit(
         self.img,
-        (int(self.px)-s, int(self.py)-s)
-    )
+        (int(self.px) - self.img.get_width() // 2,
+        int(self.py) - self.img.get_height() // 2))
         bw=s*2; rat=max(0,self.hp/self.max_hp)
         pygame.draw.rect(surf,(120,0,0),(int(self.px)-s,int(self.py)-s-8,bw,5))
         pygame.draw.rect(surf,(0,220,60),(int(self.px)-s,int(self.py)-s-8,int(bw*rat),5))
@@ -377,9 +401,11 @@ class Spawner:
 
     def _build(self):
         q=[]; n=8+self.wave*3
-        avail=[i for i,e in enumerate(ENEMY_T) if self.wave>=e["wave"]]
+        avail=[i for i,e in enumerate(ENEMY_T)
+            if self.wave>=e["wave"] and i != 5]
         if self.wave>=10 and self.wave%5==0: q.append(4); n-=1
         if self.wave>=6  and self.wave%3==0: q.append(3); n-=1
+        if self.wave == 20: q.append(5); n -= 1
         for _ in range(max(0,n)): q.append(random.choice(avail))
         random.shuffle(q); return q
 
@@ -704,7 +730,13 @@ class Game:
             self.win=True
         for e in self.enemies[:]:
             e.update()
-            if e.done: self.hp-=1; self.enemies.remove(e); self.over=(self.hp<=0)
+            if e.done:
+                if e.name == "Final":
+                    self.hp = 0
+                else:
+                    self.hp -= e.dmg
+                self.enemies.remove(e)
+                self.over = (self.hp <= 0)
             elif not e.alive: self.gold+=e.rew; self.enemies.remove(e)
         for t in self.towers: t.update(self.enemies,self.projs)
         for p in self.projs[:]:
