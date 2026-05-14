@@ -447,7 +447,7 @@ class Menu:
             {"k":"easy",  "lbl":"EASY",  "col":(60,200,80),
              "desc":["+20% gold earned","-20% enemy HP","20 base health"]},
             {"k":"normal","lbl":"NORMAL","col":(80,140,255),
-             "desc":["Standard gold","Standard HP","20 base health"]},
+             "desc":["Standard gold","Standard HP","15 base health"]},
             {"k":"hard",  "lbl":"HARD",  "col":(220,60,60),
              "desc":["-20% gold earned","+20% enemy HP","10 base health"]},
         ]
