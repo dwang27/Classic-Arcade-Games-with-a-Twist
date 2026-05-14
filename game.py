@@ -192,7 +192,7 @@ ENEMY_T = [
         "img":"storm.png"}]
 DIFF = {
     "easy":  {"hp":20,"hp_m":0.80,"rew_m":1.20,"lbl":"EASY",  "col":(60,200,80)},
-    "normal":{"hp":20,"hp_m":1.00,"rew_m":1.00,"lbl":"NORMAL","col":(80,140,255)},
+    "normal":{"hp":15,"hp_m":1.00,"rew_m":1.00,"lbl":"NORMAL","col":(80,140,255)},
     "hard":  {"hp":10,"hp_m":1.20,"rew_m":0.80,"lbl":"HARD",  "col":(220,60,60)},
 }
 
