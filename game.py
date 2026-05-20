@@ -39,7 +39,7 @@ RARITY_COLORS = {
 BASE_RATES = {"Common":0.50,"Uncommon":0.25,"Rare":0.15,"Epic":0.07,"Legendary":0.03}
 # Secret has a fixed tiny chance added on top — not part of the normalised pool
 SECRET_RATE = 0.005   # 0.5% flat, unaffected by luck
-ROLL_COST  = 50
+ROLL_COST  = 80
 
 # Path
 PATH_WPS = [(0,2),(4,2),(4,6),(8,6),(8,2),(13,2),(13,10),(4,10),(4,13),(19,13)]
@@ -375,7 +375,7 @@ class Game:
     def reset(self):
         ds=self.ds
         self.towers=[]; self.enemies=[]; self.projs=[]
-        self.gold=200; self.hp=ds["hp"]; self.max_hp=ds["hp"]
+        self.gold=250; self.hp=ds["hp"]; self.max_hp=ds["hp"]
         self.luck=0; self.luck_cost=150
         self.inv=[]; self.sel_inv=None; self.sel_tow=None
         self.inv_rects=[]
