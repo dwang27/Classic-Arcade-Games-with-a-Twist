@@ -15,6 +15,10 @@ CONTROLS:
 """
 
 import pygame, random, math, sys
+pygame.mixer.init()
+pygame.mixer.music.load("C418_-_Sweden_-_Minecraft_Volume_Alpha.wav")
+pygame.mixer.music.play(-1)  # -1 makes it loop infinitely
+pygame.mixer.music.set_volume(0.5)  # Set volume to 50% (adjust 0.0-1.0 as needed)
 
 # Info
 SCREEN_W, SCREEN_H = 1160, 720
@@ -489,7 +493,8 @@ class Game:
 
         # Preview for selected inventory item
         if self.sel_inv is not None and self.sel_inv<len(self.inv):
-            tn=self.inv[self.sel_inv]; tp=TOWER_T[tn]; rc=RARITY_COLORS[tp[0]]
+            tn=self.inv[self.sel_inv]; tp=TOWER_T[tn]
+            rc=RARITY_COLORS[tp[0]]
             py2=y
             pygame.draw.rect(self.screen,(35,42,58),(px,py2,295,115),border_radius=6)
             pygame.draw.rect(self.screen,rc,(px,py2,295,115),2,border_radius=6)
@@ -661,7 +666,7 @@ class Game:
 # Main 
 def main():
     pygame.init()
-    screen=pygame.display.set_mode((SCREEN_W,SCREEN_H))
+    screen=pygame.display.set_mode((SCREEN_W,SCREEN_H), pygame.FULLSCREEN)
     pygame.display.set_caption("Gacha Tower Defense")
     clock=pygame.time.Clock()
     while True:
