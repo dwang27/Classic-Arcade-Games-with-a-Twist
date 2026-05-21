@@ -16,7 +16,7 @@ CONTROLS:
 
 import pygame, random, math, sys
 pygame.mixer.init()
-pygame.mixer.music.load("C418_-_Sweden_-_Minecraft_Volume_Alpha.wav")
+pygame.mixer.music.load("/Users/derekhuang/Gacha_Tower_Defence/Classic-Arcade-Game-With-a-Twist/C418 - Sweden - Minecraft Volume Alpha.mp3")
 pygame.mixer.music.play(-1)  # -1 makes it loop infinitely
 pygame.mixer.music.set_volume(0.5)  # Set volume to 50% (adjust 0.0-1.0 as needed)
 
